@@ -94,8 +94,11 @@ jobs:
       - name: Run E2E tests
         run: go test -v -shuffle on -parallel 4 -tags=e2e ./internal/controller/e2e
         env:
-          EMAIL: ${{ secrets.EMAIL }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          REGISTER_EMAIL: ${{ secrets.REGISTER_EMAIL }}
+          REGISTER_PASSWORD: ${{ secrets.REGISTER_PASSWORD }}
+          EMAIL_APP_PASS: ${{ secrets.EMAIL_APP_PASS }}
+          EMAIL_SERVER: ${{ secrets.EMAIL_SERVER }}
+          EMAIL_SERVER_NAME: ${{ secrets.EMAIL_SERVER_NAME }}
           SERVICE_PORT: 8080
 
       - name: Stop Docker Compose
