@@ -94,6 +94,8 @@ jobs:
       - name: Run E2E tests
         run: go test -v -tags=e2e ./internal/e2e
         env:
+          EMAIL: ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
           SERVICE_PORT: 8080
 
       - name: Stop Docker Compose
