@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  movies_catalog:
+    restart: unless-stopped
+    build: ./
+    command: ./movies_catalog
+    depends_on:
+      - dev_db
+    env_file:
+      - .env
+    environment:
+      SERVICE_HOST: ${SERVICE_HOST}
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD}
+      POSTGRES_USERNAME: ${LOCAL_POSTGRES_USERNAME}
+      POSTGRES_DATABASE: ${LOCAL_POSTGRES_DATABASE}
+      POSTGRES_HOST: ${LOCAL_POSTGRES_HOST}
+      POSTGRES_PORT: ${LOCAL_POSTGRES_PORT}
+    ports:
+      - ${SERVICE_PORT}:${SERVICE_PORT}
+    networks:
+      - movies_catalog
+
+  dev_db:
+    image: postgres:15.3-alpine3.18
+    container_name: movies_catalog.dev_db
+    restart: unless-stopped
+    networks:
+      - movies_catalog
+    environment:
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD}
+      POSTGRES_USER: ${LOCAL_POSTGRES_USERNAME}
+      POSTGRES_DB: ${LOCAL_POSTGRES_DATABASE}
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+      - ./db/dumps/init.sql:/docker-entrypoint-initdb.d/0001_init.sql
+    ports:
+      - ${POSTGRES_PORT}:${LOCAL_POSTGRES_PORT}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U local -d dev" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  movies_catalog:
+    driver: bridge

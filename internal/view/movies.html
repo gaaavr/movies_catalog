@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог фильмов</title>
+    <style>
+        body {
+            background: #c9e5ff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .bodyText {
+            background: #c9e5ff;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .header {
+            background: #C35454;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: rgb(244, 155, 54);
+            font-size: 32px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #c9e5ff;
+            border-radius: 10px 10px 10px 10px;
+            padding: 5px;
+        }
+
+        .search-box input {
+            border: none;
+            background: #c9e5ff;
+            padding: 10px;
+            width: 200px;
+            font-size: 16px;
+            border-radius: 10px 10px 10px 10px;
+        }
+
+        .search-box button {
+            border: none;
+            background-color: #794caf;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .search-box button:hover {
+            background-color: #794caf;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .login-icon img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pagination {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: #794caf;
+            border: 1px solid #794caf;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .add-button {
+            padding: 10px 20px;
+            background-color: #794caf;
+            border-radius: 10px 10px 10px 10px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logout {
+            background-color: #f43662;
+            color: white;
+        }
+
+        .add-button:hover {
+            background-color: #794caf;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Каталог фильмов</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Введите запрос...">
+        <button type="button" onclick="refreshPageWithParam()">Поиск</button>
+    </div>
+    <button class="add-button" id="addMovieButton">Добавить фильм в каталог
+    </button>
+    <div class="auth-buttons" id="auth-buttons">
+        <a href="/register">Регистрация</a>
+        <a href="/login">Вход</a>
+    </div>
+    <button class="logout" id="logout" onclick="logout()">Выйти</button>
+</div>
+<div class="bodyText" id="movies">
+    <!-- Список фильмов будет загружен сюда -->
+</div>
+
+<div class="pagination">
+    <a href="#" id="prev">Предыдущая страница</a>
+    <a href="#" id="next">Следующая страница</a>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    const authButtons = document.getElementById('auth-buttons');
+    const logoutButton = document.getElementById('logout');
+    const addMovieButton = document.getElementById('addMovieButton')
+
+    if (token && role) {
+        authButtons.style.display = 'none';
+    }
+
+    if (!token && !role){
+        logoutButton.style.display = 'none';
+    }
+
+    if (role!=='admin'){
+        addMovieButton.style.display = 'none';
+    }
+
+    if (role === 'admin') {
+        document.getElementById('addMovieButton').addEventListener('click', function () {
+            window.location.href = '/movie-add';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchMovies(0, 3, '');
+    });
+
+    function refreshPageWithParam() {
+        var searchTerm = document.getElementById('searchInput').value;
+
+        fetchMovies(0, 3, searchTerm)
+    }
+
+    function logout() {
+        localStorage.clear()
+        window.location.href = '/catalog';
+    }
+
+    function fetchMovies(offset, limit, search) {
+        fetch(`/movies?limit=${limit}&offset=${offset}&search=${search}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `${token}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const moviesContainer = document.getElementById('movies');
+                moviesContainer.innerHTML = '';
+
+                data.movies.forEach(movie => {
+                    const movieElement = document.createElement('div');
+                    movieElement.className = 'movie';
+                    movieElement.innerHTML = `
+                        <a href="/catalog/${movie.ID}"><h2>${movie.title}</h2></a>
+                        <p>${movie.description}</p>
+                    `;
+                    moviesContainer.appendChild(movieElement);
+                });
+
+                const prevLink = document.getElementById('prev');
+                const nextLink = document.getElementById('next');
+
+                if (offset + limit >= data.total) {
+                    nextLink.style.display = 'none'
+                } else {
+                    nextLink.style.display = 'block'
+                }
+
+                if (offset === 0) {
+                    prevLink.style.display = 'none'
+                } else {
+                    prevLink.style.display = 'block'
+                }
+
+                if (offset > 0) {
+                    prevLink.href = `#`;
+                    prevLink.onclick = function () {
+                        fetchMovies(offset - limit, limit, search);
+                        return false;
+                    };
+                }
+
+                if (offset + limit < data.total) {
+                    nextLink.href = `#`;
+                    nextLink.onclick = function () {
+                        fetchMovies(offset + limit, limit, search);
+                        return false;
+                    };
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+</body>
+</html>

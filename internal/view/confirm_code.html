@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <style>
+        body {
+            background: #c9e5ff;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .code {
+            background-color: #f43662;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<h1>Вход</h1>
+<form id="codeForm">
+    <label for="code">Код подтверждения:</label>
+    <input type="code" id="code" name="code" required>
+    <br>
+    <button class="code" type="submit">Подтвердить</button>
+</form>
+<script>
+    document.getElementById('codeForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const codeData = formData.get('code');
+        const code=parseInt(codeData, 10);
+        const state = localStorage.getItem('state');
+
+        fetch('/users/code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code, state })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role);
+                    window.location.href = '/catalog';
+                } else {
+                    alert('Неверный код подтверждения');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+</body>
+</html>

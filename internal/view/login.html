@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход</title>
+  <style>
+    body {
+      background: #c9e5ff;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .login {
+      background-color: #f43662;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<h1>Вход</h1>
+<form id="loginForm">
+  <label for="username">Почта:</label>
+  <input type="text" id="username" name="username" required>
+  <br>
+  <label for="password">Пароль:</label>
+  <input type="password" id="password" name="password" required>
+  <br>
+  <button class="login" type="submit">Вход</button>
+</form>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    const username = formData.get('username');
+    const password = formData.get('password');
+
+    fetch('/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.state) {
+                localStorage.setItem('state', data.state);
+                window.location.href = '/code';
+              } else {
+                alert('Произошла ошибка, попробуйте ещё раз');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+  });
+</script>
+</body>
+</html>

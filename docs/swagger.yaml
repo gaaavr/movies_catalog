@@ -1,0 +1,469 @@
+basePath: /
+definitions:
+  comment_post.createCommentRequest:
+    properties:
+      content:
+        type: string
+      movie_id:
+        type: integer
+    type: object
+  movie_post.createMovieRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      title:
+        type: string
+    type: object
+  movie_put.updateMovieRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      title:
+        type: string
+    type: object
+  user_code_confirm_post.confirmCodeRequest:
+    properties:
+      code:
+        type: integer
+      state:
+        type: string
+    type: object
+  user_login_post.loginUserRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  user_register_post.createUserRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  view.Comment:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      movie_id:
+        type: integer
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
+  view.CommentsResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/view.Comment'
+        type: array
+    type: object
+  view.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  view.Movie:
+    properties:
+      ID:
+        type: integer
+      description:
+        type: string
+      image:
+        type: string
+      title:
+        type: string
+    type: object
+  view.MoviesResponse:
+    properties:
+      movies:
+        items:
+          $ref: '#/definitions/view.Movie'
+        type: array
+      total:
+        type: integer
+    type: object
+  view.State:
+    properties:
+      state:
+        type: string
+    type: object
+  view.Token:
+    properties:
+      role:
+        type: string
+      token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: web app for movies catalog
+  title: movies catalog
+  version: "1.0"
+paths:
+  /movies:
+    get:
+      description: get movies from catalog
+      operationId: movies-get
+      parameters:
+      - description: movie title or description, may be incomplete
+        in: query
+        name: search
+        type: string
+      - description: element count limit in movies list
+        in: query
+        name: limit
+        type: integer
+      - description: offset in movies list
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/view.MoviesResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: get movies
+      tags:
+      - movie
+    post:
+      description: create movie in catalog
+      operationId: movie-post
+      parameters:
+      - description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: movie for create
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movie_post.createMovieRequest'
+      responses:
+        "200":
+          description: success
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: create movie
+      tags:
+      - movie
+    put:
+      description: create movie in catalog
+      operationId: movie-put
+      parameters:
+      - description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: movie for update
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/movie_put.updateMovieRequest'
+      responses:
+        "200":
+          description: success
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: update movie
+      tags:
+      - movie
+  /movies/{id}:
+    delete:
+      description: delete movie from catalog
+      operationId: movie-delete
+      parameters:
+      - description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: movie id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: delete movie
+      tags:
+      - movie
+    get:
+      description: get movie by ID
+      operationId: movie-get
+      parameters:
+      - description: movie id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/view.Movie'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: get movie
+      tags:
+      - movie
+  /movies/{id}/comments:
+    get:
+      description: get comments for movie
+      operationId: comments-get
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/view.CommentsResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: get comments
+      tags:
+      - comment
+  /movies/comments:
+    post:
+      description: create comment for movie
+      operationId: comment-post
+      parameters:
+      - description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: comment for create
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/comment_post.createCommentRequest'
+      responses:
+        "200":
+          description: success
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: create comment
+      tags:
+      - comment
+  /movies/comments/{id}:
+    delete:
+      description: delete comment for movie
+      operationId: comment-delete
+      parameters:
+      - description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: delete comment
+      tags:
+      - comment
+  /users/code:
+    post:
+      description: get token after success login user
+      operationId: user-code-post
+      parameters:
+      - description: code and state for login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_code_confirm_post.confirmCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/view.Token'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: confirm code by user
+      tags:
+      - user
+  /users/login:
+    post:
+      description: get code after enter login and password
+      operationId: user-login-post
+      parameters:
+      - description: username and password for login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_login_post.loginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/view.State'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: login user
+      tags:
+      - user
+  /users/register:
+    post:
+      description: create user in database
+      operationId: user-register-post
+      parameters:
+      - description: user for create
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_register_post.createUserRequest'
+      responses:
+        "200":
+          description: success
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: create user
+      tags:
+      - user
+schemes:
+- http
+- https
+swagger: "2.0"

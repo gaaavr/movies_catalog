@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <style>
+        body {
+            background: #c9e5ff;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .movie {
+            display: flex;
+            align-items: flex-start;
+            border: 1px solid #8c1fc7;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .movie-image {
+            width: 200px; /* Фиксированная ширина */
+            height: 200px; /* Фиксированная высота */
+            object-fit: cover; /* Подгоняет изображение под размеры контейнера */
+            margin-right: 20px; /* Отступ справа от изображения */
+        }
+
+        .movie-content {
+            flex: 1;
+        }
+
+        .movie-content h2 {
+            margin-top: 0;
+            margin-bottom: 10px; /* Отступ снизу от заголовка */
+        }
+
+        .movie-content p {
+            margin-bottom: 20px; /* Отступ снизу от описания */
+        }
+
+        .admin-buttons button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .admin-buttons button.edit {
+            background-color: #794caf;
+            color: white;
+        }
+
+        .catalog-button button.catalog {
+            background-color: #f43662;
+            color: white;
+        }
+
+
+        .admin-buttons button.delete {
+            background-color: #f49b36;
+            color: white;
+        }
+
+
+        .comment {
+            border: 1px solid #794caf;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            border-radius: 10px;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-header button {
+            background-color: red;
+            color: white;
+            cursor: pointer;
+        }
+
+        .comment-date {
+            font-size: 0.8em;
+            color: #050404;
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #794caf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="catalog-button">
+    <button class="catalog" onclick="location.href='/catalog';">В каталог
+    </button>
+</div>
+<div class="movie" id="movie-details">
+    <!-- Информация о фильме будет загружена сюда -->
+</div>
+
+<form id="comment-form" style="display: none;">
+    <textarea id="comment-text" placeholder="Ваш комментарий" maxlength="50"
+              required></textarea>
+    <div class="form-group">
+        <button type="submit">Написать комментарий</button>
+    </div>
+</form>
+
+<h2 class="comments-title" id="comments-title">Комментарии</h2>
+<div id="comments">
+    <!-- Comments will be dynamically added here -->
+</div>
+
+<script>
+    function getIdFromPath() {
+        const pathSegments = window.location.pathname.split('/');
+        const id = pathSegments.pop();
+        return id;
+    }
+
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+
+    function getMovieDetails(id) {
+        fetch(`/movies/${id}`)
+            .then(response => {
+                    if (response.status === 404) {
+                        window.location.href = '/not-found';
+                    } else if (response.status === 401) {
+                        alert('Вам необходимо авторизоваться');
+                        window.location.href = '/login';
+                    } else if (response.status === 403) {
+                        alert('У вас недостаточно прав');
+                        window.location.href = '/catalog';
+                    } else if (response.status === 500) {
+                        alert('Неизвестная ошибка');
+                        window.location.href = '/error';
+                    } else {
+                        response.json().then(data => {
+                            const movieDetails = document.getElementById('movie-details');
+                            movieDetails.innerHTML = `
+                        <img src="${data.image}" alt="${data.title}" class="movie-image">
+                        <div class="movie-content">
+                                <h2>${data.title}</h2>
+                                <p>${data.description}</p>
+                            ${role === 'admin' ? `
+                                <div class="admin-buttons">
+                                    <button class="edit" onclick="editMovie('${data.ID}','${data.title}','${data.description}','${data.image}')">Изменить</button>
+                                    <button class="delete" onclick="deleteMovie('${data.ID}','${data.title}')">Удалить</button>
+                                </div>` : ''}
+                            </div>
+                          `;
+                        })
+                    }
+                }
+            )
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const id = getIdFromPath();
+        getMovieDetails(id);
+        getComments(id);
+
+        // Показываем форму добавления комментария только для залогиненных пользователей
+        if (token !== '' && (role === 'admin' || role === 'user')) {
+            document.getElementById('comment-form').style.display = 'block';
+        }
+    });
+
+    function getComments(movieId) {
+        fetch(`/movies/${movieId}/comments`)
+            .then(response => response.json())
+            .then(data => {
+                comments = data.comments;
+                renderComments();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+
+    function editMovie(id, title, description, image) {
+        // Логика для редактирования фильма
+        window.location.href = `/movie-update?id=${encodeURIComponent(id)}&title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(image)}`;
+    }
+
+    function deleteMovie(id, title) {
+        // Логика для удаления фильма
+        if (confirm('Вы уверены, что хотите удалить фильм: ' + title + '?')) {
+            fetch(`/movies/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `${token}`
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Фильм успешно удален');
+                        window.location.href = '/catalog'; // Перенаправление на страницу списка фильмов
+                    } else if (response.status === 401) {
+                        alert('Вам необходимо авторизоваться');
+                        window.location.href = '/login';
+                    } else if (response.status === 403) {
+                        alert('У вас недостаточно прав');
+                        window.location.href = '/catalog';
+                    } else {
+                        window.location.href = '/error';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    }
+
+    // Comments functionality
+    const commentsContainer = document.getElementById('comments');
+    const commentForm = document.getElementById('comment-form');
+    const commentsTitle = document.getElementById('comments-title');
+
+    let comments = [];
+
+    function renderComments() {
+        commentsContainer.innerHTML = '';
+        commentsTitle.style.display = 'block';
+
+        if (comments.length === 0) {
+            commentsTitle.style.display = 'none'; // Скрываем заголовок, если нет комментариев
+        }
+
+        comments.forEach((comment, index) => {
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment';
+            commentElement.innerHTML = `
+                <div class="comment-header">
+                    <strong>${comment.username}</strong>
+                    ${role === 'admin' ? `<button onclick="deleteComment(${index})">X</button>` : ''}
+                </div>
+                <p>${comment.content}</p>
+                       <span class="comment-date">${comment.created_at}</span>
+            `;
+            commentsContainer.appendChild(commentElement);
+        });
+    }
+
+    function addComment(event) {
+        event.preventDefault();
+        const content = document.getElementById('comment-text').value;
+
+        fetch(`/movies/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token}`
+            },
+            body: JSON.stringify({
+                content,
+                movie_id: parseInt(getIdFromPath(), 10)
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    getComments(getIdFromPath());
+                    commentForm.reset();
+                } else if (response.status === 401) {
+                    alert('Вам необходимо авторизоваться');
+                    window.location.href = '/login';
+                } else if (response.status === 403) {
+                    alert('У вас недостаточно прав');
+                } else {
+                    window.location.href = '/error';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Function to delete a comment
+    window.deleteComment = function (index) {
+        const commentId = comments[index].id;
+        fetch(`/movies/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `${token}`
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    comments.splice(index, 1);
+                    renderComments();
+                } else if (response.status === 401) {
+                    alert('Вам необходимо авторизоваться');
+                    window.location.href = '/login';
+                } else if (response.status === 403) {
+                    alert('У вас недостаточно прав');
+                } else {
+                    window.location.href = '/error';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    };
+
+    // Event listener for the comment form
+    commentForm.addEventListener('submit', addComment);
+</script>
+</body>
+</html>
