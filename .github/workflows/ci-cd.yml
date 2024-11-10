@@ -68,7 +68,7 @@ jobs:
       - name: Run integration tests
         run: |
           docker compose -f docker-compose.yml up -d
-          docker compose -f docker-compose.yml run movies_catalog go test -v -shuffle on -parallel 4 -tags=integration ./internal/store
+          docker compose -f docker-compose.yml run movies_catalog go test -v -shuffle on -parallel 4 -tags=integration ./internal/view
           docker compose -f docker-compose.yml down
 
   e2e-tests:
