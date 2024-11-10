@@ -89,7 +89,7 @@ jobs:
         run: make env
 
       - name: Start Docker Compose
-        run:  docker compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose.yml up -d
 
       - name: Run E2E tests
         run: go test -v -tags=e2e ./internal/e2e
