@@ -7,22 +7,23 @@ import (
 	"sync"
 	mm_atomic "sync/atomic"
 	mm_time "time"
+	"web_lab/internal/models"
 
 	"github.com/gojuno/minimock/v3"
 )
 
-// MovieGetterMock implements movies_get.movieGetter
+// MovieGetterMock implements movie_get.movieGetter
 type MovieGetterMock struct {
 	t minimock.Tester
 
-	funcGetMovie          func(ctx context.Context, id int64) (m1 Movie, err error)
+	funcGetMovie          func(ctx context.Context, id int64) (m1 models.Movie, err error)
 	inspectFuncGetMovie   func(ctx context.Context, id int64)
 	afterGetMovieCounter  uint64
 	beforeGetMovieCounter uint64
 	GetMovieMock          mMovieGetterMockGetMovie
 }
 
-// NewMovieGetterMock returns a mock for movies_get.movieGetter
+// NewMovieGetterMock returns a mock for movie_get.movieGetter
 func NewMovieGetterMock(t minimock.Tester) *MovieGetterMock {
 	m := &MovieGetterMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -60,7 +61,7 @@ type MovieGetterMockGetMovieParams struct {
 
 // MovieGetterMockGetMovieResults contains results of the movieGetter.GetMovie
 type MovieGetterMockGetMovieResults struct {
-	m1  Movie
+	m1  models.Movie
 	err error
 }
 
@@ -96,7 +97,7 @@ func (mmGetMovie *mMovieGetterMockGetMovie) Inspect(f func(ctx context.Context, 
 }
 
 // Return sets up results that will be returned by movieGetter.GetMovie
-func (mmGetMovie *mMovieGetterMockGetMovie) Return(m1 Movie, err error) *MovieGetterMock {
+func (mmGetMovie *mMovieGetterMockGetMovie) Return(m1 models.Movie, err error) *MovieGetterMock {
 	if mmGetMovie.mock.funcGetMovie != nil {
 		mmGetMovie.mock.t.Fatalf("MovieGetterMock.GetMovie mock is already set by Set")
 	}
@@ -109,7 +110,7 @@ func (mmGetMovie *mMovieGetterMockGetMovie) Return(m1 Movie, err error) *MovieGe
 }
 
 // Set uses given function f to mock the movieGetter.GetMovie method
-func (mmGetMovie *mMovieGetterMockGetMovie) Set(f func(ctx context.Context, id int64) (m1 Movie, err error)) *MovieGetterMock {
+func (mmGetMovie *mMovieGetterMockGetMovie) Set(f func(ctx context.Context, id int64) (m1 models.Movie, err error)) *MovieGetterMock {
 	if mmGetMovie.defaultExpectation != nil {
 		mmGetMovie.mock.t.Fatalf("Default expectation is already set for the movieGetter.GetMovie method")
 	}
@@ -138,13 +139,13 @@ func (mmGetMovie *mMovieGetterMockGetMovie) When(ctx context.Context, id int64) 
 }
 
 // Then sets up movieGetter.GetMovie return parameters for the expectation previously defined by the When method
-func (e *MovieGetterMockGetMovieExpectation) Then(m1 Movie, err error) *MovieGetterMock {
+func (e *MovieGetterMockGetMovieExpectation) Then(m1 models.Movie, err error) *MovieGetterMock {
 	e.results = &MovieGetterMockGetMovieResults{m1, err}
 	return e.mock
 }
 
-// GetMovie implements movies_get.movieGetter
-func (mmGetMovie *MovieGetterMock) GetMovie(ctx context.Context, id int64) (m1 Movie, err error) {
+// GetMovie implements movie_get.movieGetter
+func (mmGetMovie *MovieGetterMock) GetMovie(ctx context.Context, id int64) (m1 models.Movie, err error) {
 	mm_atomic.AddUint64(&mmGetMovie.beforeGetMovieCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetMovie.afterGetMovieCounter, 1)
 
