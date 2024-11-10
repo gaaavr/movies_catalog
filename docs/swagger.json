@@ -498,6 +498,88 @@
                 }
             }
         },
+        "/users/password": {
+            "put": {
+                "description": "get code after change password password",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "user change password",
+                "operationId": "user-pass-put",
+                "parameters": [
+                    {
+                        "description": "username, password  and new password",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_change_password_put.userChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/view.State"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/view.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "$ref": "#/definitions/view.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/password/code": {
+            "post": {
+                "description": "change password after confirm by user",
+                "tags": [
+                    "user"
+                ],
+                "summary": "confirm code by user",
+                "operationId": "user-pass-code-post",
+                "parameters": [
+                    {
+                        "description": "code and state for change pass",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_password_code_confirm_post.confirmCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/view.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "$ref": "#/definitions/view.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/register": {
             "post": {
                 "description": "create user in database",
@@ -580,6 +662,20 @@
                 }
             }
         },
+        "user_change_password_put.userChangePasswordRequest": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "user_code_confirm_post.confirmCodeRequest": {
             "type": "object",
             "properties": {
@@ -598,6 +694,17 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_password_code_confirm_post.confirmCodeRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "state": {
                     "type": "string"
                 }
             }

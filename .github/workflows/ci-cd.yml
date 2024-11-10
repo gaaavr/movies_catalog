@@ -99,6 +99,13 @@ jobs:
           EMAIL_APP_PASS: ${{ secrets.EMAIL_APP_PASS }}
           EMAIL_SERVER: ${{ secrets.EMAIL_SERVER }}
           EMAIL_SERVER_NAME: ${{ secrets.EMAIL_SERVER_NAME }}
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME}}
+          EMAIL_PORT: ${{ secrets.EMAIL_PORT}}
+          EMAIL_SENDER_APP_PASS: ${{ secrets.EMAIL_SENDER_APP_PASS}}
+          CHANGE_PASS_EMAIL: ${{ secrets.CHANGE_PASS_EMAIL}}
+          CHANGE_OLD_PASS: ${{ secrets.CHANGE_OLD_PASS}}
+          CHANGE_NEW_PASS: ${{ secrets.CHANGE_NEW_PASS}}
+          CHANGE_PASS_APP_PASS: ${{ secrets.CHANGE_PASS_APP_PASS}}
           SERVICE_PORT: 8080
 
       - name: Stop Docker Compose

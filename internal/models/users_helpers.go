@@ -8,6 +8,12 @@ func buildCreateUserQuery(user User) (string, []interface{}, error) {
 		Values(user.Username, user.Password, user.Role).ToSql()
 }
 
+// Функция для формирования запроса на обновление пользователя
+func buildUpdateUserQuery(user User) (string, []interface{}, error) {
+	return qb.Update(tableUsers).Set("password", user.Password).
+		Where(sq.And{sq.Eq{"id": user.ID}}).ToSql()
+}
+
 // Функция для формирования запроса для получения информации о пользователе
 func buildGetUserQuery(username, paswword string) (string, []interface{}, error) {
 	return qb.

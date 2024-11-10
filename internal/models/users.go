@@ -43,6 +43,20 @@ func (s *PG) CreateUser(ctx context.Context, user User) error {
 	return nil
 }
 
+func (s *PG) UpdateUser(ctx context.Context, user User) error {
+	query, args, err := buildUpdateUserQuery(user)
+	if err != nil {
+		return fmt.Errorf("[users_pg] failed to build update user query: %w", err)
+	}
+
+	_, err = s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("[users_pg] failed to update user: %w", err)
+	}
+
+	return nil
+}
+
 func (s *PG) GetUser(ctx context.Context, username, password string) (User, error) {
 	query, args, err := buildGetUserQuery(username, password)
 	if err != nil {

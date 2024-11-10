@@ -15,8 +15,8 @@ import (
 type TokenGeneratorMock struct {
 	t minimock.Tester
 
-	funcGenerateToken          func(user models.User, role string) (s1 string, err error)
-	inspectFuncGenerateToken   func(user models.User, role string)
+	funcGenerateToken          func(user models.User) (s1 string, err error)
+	inspectFuncGenerateToken   func(user models.User)
 	afterGenerateTokenCounter  uint64
 	beforeGenerateTokenCounter uint64
 	GenerateTokenMock          mTokenGeneratorMockGenerateToken
@@ -55,7 +55,6 @@ type TokenGeneratorMockGenerateTokenExpectation struct {
 // TokenGeneratorMockGenerateTokenParams contains parameters of the tokenGenerator.GenerateToken
 type TokenGeneratorMockGenerateTokenParams struct {
 	user models.User
-	role string
 }
 
 // TokenGeneratorMockGenerateTokenResults contains results of the tokenGenerator.GenerateToken
@@ -65,7 +64,7 @@ type TokenGeneratorMockGenerateTokenResults struct {
 }
 
 // Expect sets up expected params for tokenGenerator.GenerateToken
-func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Expect(user models.User, role string) *mTokenGeneratorMockGenerateToken {
+func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Expect(user models.User) *mTokenGeneratorMockGenerateToken {
 	if mmGenerateToken.mock.funcGenerateToken != nil {
 		mmGenerateToken.mock.t.Fatalf("TokenGeneratorMock.GenerateToken mock is already set by Set")
 	}
@@ -74,7 +73,7 @@ func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Expect(user models.User
 		mmGenerateToken.defaultExpectation = &TokenGeneratorMockGenerateTokenExpectation{}
 	}
 
-	mmGenerateToken.defaultExpectation.params = &TokenGeneratorMockGenerateTokenParams{user, role}
+	mmGenerateToken.defaultExpectation.params = &TokenGeneratorMockGenerateTokenParams{user}
 	for _, e := range mmGenerateToken.expectations {
 		if minimock.Equal(e.params, mmGenerateToken.defaultExpectation.params) {
 			mmGenerateToken.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGenerateToken.defaultExpectation.params)
@@ -85,7 +84,7 @@ func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Expect(user models.User
 }
 
 // Inspect accepts an inspector function that has same arguments as the tokenGenerator.GenerateToken
-func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Inspect(f func(user models.User, role string)) *mTokenGeneratorMockGenerateToken {
+func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Inspect(f func(user models.User)) *mTokenGeneratorMockGenerateToken {
 	if mmGenerateToken.mock.inspectFuncGenerateToken != nil {
 		mmGenerateToken.mock.t.Fatalf("Inspect function is already set for TokenGeneratorMock.GenerateToken")
 	}
@@ -109,7 +108,7 @@ func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Return(s1 string, err e
 }
 
 // Set uses given function f to mock the tokenGenerator.GenerateToken method
-func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Set(f func(user models.User, role string) (s1 string, err error)) *TokenGeneratorMock {
+func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Set(f func(user models.User) (s1 string, err error)) *TokenGeneratorMock {
 	if mmGenerateToken.defaultExpectation != nil {
 		mmGenerateToken.mock.t.Fatalf("Default expectation is already set for the tokenGenerator.GenerateToken method")
 	}
@@ -124,14 +123,14 @@ func (mmGenerateToken *mTokenGeneratorMockGenerateToken) Set(f func(user models.
 
 // When sets expectation for the tokenGenerator.GenerateToken which will trigger the result defined by the following
 // Then helper
-func (mmGenerateToken *mTokenGeneratorMockGenerateToken) When(user models.User, role string) *TokenGeneratorMockGenerateTokenExpectation {
+func (mmGenerateToken *mTokenGeneratorMockGenerateToken) When(user models.User) *TokenGeneratorMockGenerateTokenExpectation {
 	if mmGenerateToken.mock.funcGenerateToken != nil {
 		mmGenerateToken.mock.t.Fatalf("TokenGeneratorMock.GenerateToken mock is already set by Set")
 	}
 
 	expectation := &TokenGeneratorMockGenerateTokenExpectation{
 		mock:   mmGenerateToken.mock,
-		params: &TokenGeneratorMockGenerateTokenParams{user, role},
+		params: &TokenGeneratorMockGenerateTokenParams{user},
 	}
 	mmGenerateToken.expectations = append(mmGenerateToken.expectations, expectation)
 	return expectation
@@ -144,15 +143,15 @@ func (e *TokenGeneratorMockGenerateTokenExpectation) Then(s1 string, err error) 
 }
 
 // GenerateToken implements user_code_confirm_post.tokenGenerator
-func (mmGenerateToken *TokenGeneratorMock) GenerateToken(user models.User, role string) (s1 string, err error) {
+func (mmGenerateToken *TokenGeneratorMock) GenerateToken(user models.User) (s1 string, err error) {
 	mm_atomic.AddUint64(&mmGenerateToken.beforeGenerateTokenCounter, 1)
 	defer mm_atomic.AddUint64(&mmGenerateToken.afterGenerateTokenCounter, 1)
 
 	if mmGenerateToken.inspectFuncGenerateToken != nil {
-		mmGenerateToken.inspectFuncGenerateToken(user, role)
+		mmGenerateToken.inspectFuncGenerateToken(user)
 	}
 
-	mm_params := &TokenGeneratorMockGenerateTokenParams{user, role}
+	mm_params := &TokenGeneratorMockGenerateTokenParams{user}
 
 	// Record call args
 	mmGenerateToken.GenerateTokenMock.mutex.Lock()
@@ -169,7 +168,7 @@ func (mmGenerateToken *TokenGeneratorMock) GenerateToken(user models.User, role 
 	if mmGenerateToken.GenerateTokenMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmGenerateToken.GenerateTokenMock.defaultExpectation.Counter, 1)
 		mm_want := mmGenerateToken.GenerateTokenMock.defaultExpectation.params
-		mm_got := TokenGeneratorMockGenerateTokenParams{user, role}
+		mm_got := TokenGeneratorMockGenerateTokenParams{user}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmGenerateToken.t.Errorf("TokenGeneratorMock.GenerateToken got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -181,9 +180,9 @@ func (mmGenerateToken *TokenGeneratorMock) GenerateToken(user models.User, role 
 		return (*mm_results).s1, (*mm_results).err
 	}
 	if mmGenerateToken.funcGenerateToken != nil {
-		return mmGenerateToken.funcGenerateToken(user, role)
+		return mmGenerateToken.funcGenerateToken(user)
 	}
-	mmGenerateToken.t.Fatalf("Unexpected call to TokenGeneratorMock.GenerateToken. %v %v", user, role)
+	mmGenerateToken.t.Fatalf("Unexpected call to TokenGeneratorMock.GenerateToken. %v", user)
 	return
 }
 

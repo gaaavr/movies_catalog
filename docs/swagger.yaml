@@ -27,6 +27,15 @@ definitions:
       title:
         type: string
     type: object
+  user_change_password_put.userChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   user_code_confirm_post.confirmCodeRequest:
     properties:
       code:
@@ -39,6 +48,13 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  user_password_code_confirm_post.confirmCodeRequest:
+    properties:
+      code:
+        type: integer
+      state:
         type: string
     type: object
   user_register_post.createUserRequest:
@@ -436,6 +452,60 @@ paths:
           schema:
             $ref: '#/definitions/view.ErrorResponse'
       summary: login user
+      tags:
+      - user
+  /users/password:
+    put:
+      description: get code after change password password
+      operationId: user-pass-put
+      parameters:
+      - description: username, password  and new password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_change_password_put.userChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/view.State'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: user change password
+      tags:
+      - user
+  /users/password/code:
+    post:
+      description: change password after confirm by user
+      operationId: user-pass-code-post
+      parameters:
+      - description: code and state for change pass
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_password_code_confirm_post.confirmCodeRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/view.ErrorResponse'
+      summary: confirm code by user
       tags:
       - user
   /users/register:

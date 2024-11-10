@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Postgres PostgresConfig
 	Server   ServerConfig
+	Email    EmailConfig
 }
 
 type PostgresConfig struct {
@@ -23,6 +24,13 @@ type PostgresConfig struct {
 type ServerConfig struct {
 	Host string `env:"SERVICE_HOST" envDefault:"0.0.0.0"`
 	Port string `env:"SERVICE_PORT" envDefault:"8080"`
+}
+
+type EmailConfig struct {
+	Username string `env:"EMAIL_USERNAME"`
+	AppPass  string `env:"EMAIL_SENDER_APP_PASS"`
+	Server   string `env:"EMAIL_SERVER_NAME"`
+	Port     int    `env:"EMAIL_PORT"`
 }
 
 func New() (*Config, error) {

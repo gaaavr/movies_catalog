@@ -22,8 +22,10 @@ import (
 	"web_lab/internal/controller/handler/movie_post"
 	"web_lab/internal/controller/handler/movie_put"
 	"web_lab/internal/controller/handler/movies_get"
+	"web_lab/internal/controller/handler/user_change_password_put"
 	"web_lab/internal/controller/handler/user_code_confirm_post"
 	"web_lab/internal/controller/handler/user_login_post"
+	"web_lab/internal/controller/handler/user_password_code_confirm_post"
 	"web_lab/internal/controller/handler/user_register_post"
 	"web_lab/internal/controller/middleware/auth_middleware"
 	"web_lab/internal/models"
@@ -65,7 +67,9 @@ func main() {
 	deleteCommentHandler := comment_delete.New(storePG)
 
 	createUserHandler := user_register_post.New(storePG)
-	loginUserHandler := user_login_post.New(storePG)
+	loginUserHandler := user_login_post.New(storePG, cfg.Email)
+	changePassUserHandler := user_change_password_put.New(storePG, cfg.Email)
+	confirmCodeChangePassHandler := user_password_code_confirm_post.New(storePG)
 	confirmCodeUserHandler := user_code_confirm_post.New(storePG, tokenService)
 
 	server := controller.NewServer(cfg.Server, auth_middleware.New(tokenService))
@@ -91,8 +95,12 @@ func main() {
 		createUserHandler.GetPath(), createUserHandler.Handle)
 	server.RegisterHandler(loginUserHandler.GetMethod(),
 		loginUserHandler.GetPath(), loginUserHandler.Handle)
+	server.RegisterHandler(changePassUserHandler.GetMethod(),
+		changePassUserHandler.GetPath(), changePassUserHandler.Handle)
 	server.RegisterHandler(confirmCodeUserHandler.GetMethod(),
 		confirmCodeUserHandler.GetPath(), confirmCodeUserHandler.Handle)
+	server.RegisterHandler(confirmCodeChangePassHandler.GetMethod(),
+		confirmCodeChangePassHandler.GetPath(), confirmCodeChangePassHandler.Handle)
 	server.RegisterHandler(getMoviesHandler.GetMethod(),
 		getMoviesHandler.GetPath(), getMoviesHandler.Handle)
 	server.RegisterHandler(getMovieHandler.GetMethod(),

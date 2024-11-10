@@ -1,5 +1,5 @@
 //go:generate minimock -i .store -s _mock.go -o ./mock -g
-package user_login_post
+package user_change_password_put
 
 import (
 	"context"
@@ -32,9 +32,10 @@ type Handler struct {
 	password string
 }
 
-type loginUserRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+type userChangePasswordRequest struct {
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	NewPassword string `json:"new_password"`
 }
 
 func New(store store, emailCfg config.EmailConfig) *Handler {
@@ -48,16 +49,16 @@ func New(store store, emailCfg config.EmailConfig) *Handler {
 }
 
 // Handle godoc
-// @Summary login user
+// @Summary user change password
 // @Tags user
-// @Description get code after enter login and password
-// @ID user-login-post
-// @Param user body loginUserRequest  true "username and password for login"
+// @Description get code after change password
+// @ID user-pass-put
+// @Param user body userChangePasswordRequest true "username, password  and new password"
 // @Produce json
 // @Success 200 {object} view.State "success"
 // @Failure 400 {object} view.ErrorResponse "bad request"
 // @Failure 500 {object} view.ErrorResponse "internal error"
-// @Router /users/login [post]
+// @Router /users/password [put]
 func (h *Handler) Handle(c *gin.Context) {
 	ctx := context.Background()
 
@@ -73,7 +74,7 @@ func (h *Handler) Handle(c *gin.Context) {
 
 	defer c.Request.Body.Close()
 
-	var request loginUserRequest
+	var request userChangePasswordRequest
 
 	err = json.Unmarshal(data, &request)
 	if err != nil {
@@ -99,7 +100,7 @@ func (h *Handler) Handle(c *gin.Context) {
 	randomNumber := randomizer.Int63n(9000) + 1000
 	state := uuid.NewString()
 
-	err = h.store.AddState(ctx, state, "", randomNumber, int64(user.ID))
+	err = h.store.AddState(ctx, state, request.NewPassword, randomNumber, int64(user.ID))
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -137,9 +138,9 @@ func (h *Handler) sendEmail(to string, subject string, code int64) error {
 }
 
 func (h *Handler) GetMethod() string {
-	return http.MethodPost
+	return http.MethodPut
 }
 
 func (h *Handler) GetPath() string {
-	return "/users/login"
+	return "/users/password"
 }

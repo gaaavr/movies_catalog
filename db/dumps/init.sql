@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS states
 (
     state_id uuid,
     user_id bigint REFERENCES users (id) ON DELETE CASCADE,
+    password varchar(255),
     code bigint,
     created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -51,8 +52,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS states_id_idx ON states (state_id,code,user_id
 -- Добавление тестовых данных
 INSERT INTO users
     (username, password, role)
-VALUES ('ssg02808@yandex.ru', 'qwerty', 'admin'),
-       ('molka4477@gmail.com', '123', 'user');
+VALUES ('molka4477@gmail.com', '123', 'user'),
+       ('smilee88@yandex.ru', 'qwerty', 'user');
 
 INSERT INTO movies
 (title, description, image)

@@ -12,7 +12,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 )
 
-// StoreMock implements user_code_confirm_post.store
+// StoreMock implements user_password_code_confirm_post.store
 type StoreMock struct {
 	t minimock.Tester
 
@@ -22,14 +22,14 @@ type StoreMock struct {
 	beforeDeleteStateCounter uint64
 	DeleteStateMock          mStoreMockDeleteState
 
-	funcGetUserByID          func(ctx context.Context, userID int64) (u1 models.User, err error)
-	inspectFuncGetUserByID   func(ctx context.Context, userID int64)
-	afterGetUserByIDCounter  uint64
-	beforeGetUserByIDCounter uint64
-	GetUserByIDMock          mStoreMockGetUserByID
+	funcUpdateUser          func(ctx context.Context, user models.User) (err error)
+	inspectFuncUpdateUser   func(ctx context.Context, user models.User)
+	afterUpdateUserCounter  uint64
+	beforeUpdateUserCounter uint64
+	UpdateUserMock          mStoreMockUpdateUser
 }
 
-// NewStoreMock returns a mock for user_code_confirm_post.store
+// NewStoreMock returns a mock for user_password_code_confirm_post.store
 func NewStoreMock(t minimock.Tester) *StoreMock {
 	m := &StoreMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -39,8 +39,8 @@ func NewStoreMock(t minimock.Tester) *StoreMock {
 	m.DeleteStateMock = mStoreMockDeleteState{mock: m}
 	m.DeleteStateMock.callArgs = []*StoreMockDeleteStateParams{}
 
-	m.GetUserByIDMock = mStoreMockGetUserByID{mock: m}
-	m.GetUserByIDMock.callArgs = []*StoreMockGetUserByIDParams{}
+	m.UpdateUserMock = mStoreMockUpdateUser{mock: m}
+	m.UpdateUserMock.callArgs = []*StoreMockUpdateUserParams{}
 
 	return m
 }
@@ -155,7 +155,7 @@ func (e *StoreMockDeleteStateExpectation) Then(i1 int64, s1 string, err error) *
 	return e.mock
 }
 
-// DeleteState implements user_code_confirm_post.store
+// DeleteState implements user_password_code_confirm_post.store
 func (mmDeleteState *StoreMock) DeleteState(ctx context.Context, stateID string, code int64) (i1 int64, s1 string, err error) {
 	mm_atomic.AddUint64(&mmDeleteState.beforeDeleteStateCounter, 1)
 	defer mm_atomic.AddUint64(&mmDeleteState.afterDeleteStateCounter, 1)
@@ -264,220 +264,219 @@ func (m *StoreMock) MinimockDeleteStateInspect() {
 	}
 }
 
-type mStoreMockGetUserByID struct {
+type mStoreMockUpdateUser struct {
 	mock               *StoreMock
-	defaultExpectation *StoreMockGetUserByIDExpectation
-	expectations       []*StoreMockGetUserByIDExpectation
+	defaultExpectation *StoreMockUpdateUserExpectation
+	expectations       []*StoreMockUpdateUserExpectation
 
-	callArgs []*StoreMockGetUserByIDParams
+	callArgs []*StoreMockUpdateUserParams
 	mutex    sync.RWMutex
 }
 
-// StoreMockGetUserByIDExpectation specifies expectation struct of the store.GetUserByID
-type StoreMockGetUserByIDExpectation struct {
+// StoreMockUpdateUserExpectation specifies expectation struct of the store.UpdateUser
+type StoreMockUpdateUserExpectation struct {
 	mock    *StoreMock
-	params  *StoreMockGetUserByIDParams
-	results *StoreMockGetUserByIDResults
+	params  *StoreMockUpdateUserParams
+	results *StoreMockUpdateUserResults
 	Counter uint64
 }
 
-// StoreMockGetUserByIDParams contains parameters of the store.GetUserByID
-type StoreMockGetUserByIDParams struct {
-	ctx    context.Context
-	userID int64
+// StoreMockUpdateUserParams contains parameters of the store.UpdateUser
+type StoreMockUpdateUserParams struct {
+	ctx  context.Context
+	user models.User
 }
 
-// StoreMockGetUserByIDResults contains results of the store.GetUserByID
-type StoreMockGetUserByIDResults struct {
-	u1  models.User
+// StoreMockUpdateUserResults contains results of the store.UpdateUser
+type StoreMockUpdateUserResults struct {
 	err error
 }
 
-// Expect sets up expected params for store.GetUserByID
-func (mmGetUserByID *mStoreMockGetUserByID) Expect(ctx context.Context, userID int64) *mStoreMockGetUserByID {
-	if mmGetUserByID.mock.funcGetUserByID != nil {
-		mmGetUserByID.mock.t.Fatalf("StoreMock.GetUserByID mock is already set by Set")
+// Expect sets up expected params for store.UpdateUser
+func (mmUpdateUser *mStoreMockUpdateUser) Expect(ctx context.Context, user models.User) *mStoreMockUpdateUser {
+	if mmUpdateUser.mock.funcUpdateUser != nil {
+		mmUpdateUser.mock.t.Fatalf("StoreMock.UpdateUser mock is already set by Set")
 	}
 
-	if mmGetUserByID.defaultExpectation == nil {
-		mmGetUserByID.defaultExpectation = &StoreMockGetUserByIDExpectation{}
+	if mmUpdateUser.defaultExpectation == nil {
+		mmUpdateUser.defaultExpectation = &StoreMockUpdateUserExpectation{}
 	}
 
-	mmGetUserByID.defaultExpectation.params = &StoreMockGetUserByIDParams{ctx, userID}
-	for _, e := range mmGetUserByID.expectations {
-		if minimock.Equal(e.params, mmGetUserByID.defaultExpectation.params) {
-			mmGetUserByID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetUserByID.defaultExpectation.params)
+	mmUpdateUser.defaultExpectation.params = &StoreMockUpdateUserParams{ctx, user}
+	for _, e := range mmUpdateUser.expectations {
+		if minimock.Equal(e.params, mmUpdateUser.defaultExpectation.params) {
+			mmUpdateUser.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmUpdateUser.defaultExpectation.params)
 		}
 	}
 
-	return mmGetUserByID
+	return mmUpdateUser
 }
 
-// Inspect accepts an inspector function that has same arguments as the store.GetUserByID
-func (mmGetUserByID *mStoreMockGetUserByID) Inspect(f func(ctx context.Context, userID int64)) *mStoreMockGetUserByID {
-	if mmGetUserByID.mock.inspectFuncGetUserByID != nil {
-		mmGetUserByID.mock.t.Fatalf("Inspect function is already set for StoreMock.GetUserByID")
+// Inspect accepts an inspector function that has same arguments as the store.UpdateUser
+func (mmUpdateUser *mStoreMockUpdateUser) Inspect(f func(ctx context.Context, user models.User)) *mStoreMockUpdateUser {
+	if mmUpdateUser.mock.inspectFuncUpdateUser != nil {
+		mmUpdateUser.mock.t.Fatalf("Inspect function is already set for StoreMock.UpdateUser")
 	}
 
-	mmGetUserByID.mock.inspectFuncGetUserByID = f
+	mmUpdateUser.mock.inspectFuncUpdateUser = f
 
-	return mmGetUserByID
+	return mmUpdateUser
 }
 
-// Return sets up results that will be returned by store.GetUserByID
-func (mmGetUserByID *mStoreMockGetUserByID) Return(u1 models.User, err error) *StoreMock {
-	if mmGetUserByID.mock.funcGetUserByID != nil {
-		mmGetUserByID.mock.t.Fatalf("StoreMock.GetUserByID mock is already set by Set")
+// Return sets up results that will be returned by store.UpdateUser
+func (mmUpdateUser *mStoreMockUpdateUser) Return(err error) *StoreMock {
+	if mmUpdateUser.mock.funcUpdateUser != nil {
+		mmUpdateUser.mock.t.Fatalf("StoreMock.UpdateUser mock is already set by Set")
 	}
 
-	if mmGetUserByID.defaultExpectation == nil {
-		mmGetUserByID.defaultExpectation = &StoreMockGetUserByIDExpectation{mock: mmGetUserByID.mock}
+	if mmUpdateUser.defaultExpectation == nil {
+		mmUpdateUser.defaultExpectation = &StoreMockUpdateUserExpectation{mock: mmUpdateUser.mock}
 	}
-	mmGetUserByID.defaultExpectation.results = &StoreMockGetUserByIDResults{u1, err}
-	return mmGetUserByID.mock
+	mmUpdateUser.defaultExpectation.results = &StoreMockUpdateUserResults{err}
+	return mmUpdateUser.mock
 }
 
-// Set uses given function f to mock the store.GetUserByID method
-func (mmGetUserByID *mStoreMockGetUserByID) Set(f func(ctx context.Context, userID int64) (u1 models.User, err error)) *StoreMock {
-	if mmGetUserByID.defaultExpectation != nil {
-		mmGetUserByID.mock.t.Fatalf("Default expectation is already set for the store.GetUserByID method")
+// Set uses given function f to mock the store.UpdateUser method
+func (mmUpdateUser *mStoreMockUpdateUser) Set(f func(ctx context.Context, user models.User) (err error)) *StoreMock {
+	if mmUpdateUser.defaultExpectation != nil {
+		mmUpdateUser.mock.t.Fatalf("Default expectation is already set for the store.UpdateUser method")
 	}
 
-	if len(mmGetUserByID.expectations) > 0 {
-		mmGetUserByID.mock.t.Fatalf("Some expectations are already set for the store.GetUserByID method")
+	if len(mmUpdateUser.expectations) > 0 {
+		mmUpdateUser.mock.t.Fatalf("Some expectations are already set for the store.UpdateUser method")
 	}
 
-	mmGetUserByID.mock.funcGetUserByID = f
-	return mmGetUserByID.mock
+	mmUpdateUser.mock.funcUpdateUser = f
+	return mmUpdateUser.mock
 }
 
-// When sets expectation for the store.GetUserByID which will trigger the result defined by the following
+// When sets expectation for the store.UpdateUser which will trigger the result defined by the following
 // Then helper
-func (mmGetUserByID *mStoreMockGetUserByID) When(ctx context.Context, userID int64) *StoreMockGetUserByIDExpectation {
-	if mmGetUserByID.mock.funcGetUserByID != nil {
-		mmGetUserByID.mock.t.Fatalf("StoreMock.GetUserByID mock is already set by Set")
+func (mmUpdateUser *mStoreMockUpdateUser) When(ctx context.Context, user models.User) *StoreMockUpdateUserExpectation {
+	if mmUpdateUser.mock.funcUpdateUser != nil {
+		mmUpdateUser.mock.t.Fatalf("StoreMock.UpdateUser mock is already set by Set")
 	}
 
-	expectation := &StoreMockGetUserByIDExpectation{
-		mock:   mmGetUserByID.mock,
-		params: &StoreMockGetUserByIDParams{ctx, userID},
+	expectation := &StoreMockUpdateUserExpectation{
+		mock:   mmUpdateUser.mock,
+		params: &StoreMockUpdateUserParams{ctx, user},
 	}
-	mmGetUserByID.expectations = append(mmGetUserByID.expectations, expectation)
+	mmUpdateUser.expectations = append(mmUpdateUser.expectations, expectation)
 	return expectation
 }
 
-// Then sets up store.GetUserByID return parameters for the expectation previously defined by the When method
-func (e *StoreMockGetUserByIDExpectation) Then(u1 models.User, err error) *StoreMock {
-	e.results = &StoreMockGetUserByIDResults{u1, err}
+// Then sets up store.UpdateUser return parameters for the expectation previously defined by the When method
+func (e *StoreMockUpdateUserExpectation) Then(err error) *StoreMock {
+	e.results = &StoreMockUpdateUserResults{err}
 	return e.mock
 }
 
-// GetUserByID implements user_code_confirm_post.store
-func (mmGetUserByID *StoreMock) GetUserByID(ctx context.Context, userID int64) (u1 models.User, err error) {
-	mm_atomic.AddUint64(&mmGetUserByID.beforeGetUserByIDCounter, 1)
-	defer mm_atomic.AddUint64(&mmGetUserByID.afterGetUserByIDCounter, 1)
+// UpdateUser implements user_password_code_confirm_post.store
+func (mmUpdateUser *StoreMock) UpdateUser(ctx context.Context, user models.User) (err error) {
+	mm_atomic.AddUint64(&mmUpdateUser.beforeUpdateUserCounter, 1)
+	defer mm_atomic.AddUint64(&mmUpdateUser.afterUpdateUserCounter, 1)
 
-	if mmGetUserByID.inspectFuncGetUserByID != nil {
-		mmGetUserByID.inspectFuncGetUserByID(ctx, userID)
+	if mmUpdateUser.inspectFuncUpdateUser != nil {
+		mmUpdateUser.inspectFuncUpdateUser(ctx, user)
 	}
 
-	mm_params := &StoreMockGetUserByIDParams{ctx, userID}
+	mm_params := &StoreMockUpdateUserParams{ctx, user}
 
 	// Record call args
-	mmGetUserByID.GetUserByIDMock.mutex.Lock()
-	mmGetUserByID.GetUserByIDMock.callArgs = append(mmGetUserByID.GetUserByIDMock.callArgs, mm_params)
-	mmGetUserByID.GetUserByIDMock.mutex.Unlock()
+	mmUpdateUser.UpdateUserMock.mutex.Lock()
+	mmUpdateUser.UpdateUserMock.callArgs = append(mmUpdateUser.UpdateUserMock.callArgs, mm_params)
+	mmUpdateUser.UpdateUserMock.mutex.Unlock()
 
-	for _, e := range mmGetUserByID.GetUserByIDMock.expectations {
+	for _, e := range mmUpdateUser.UpdateUserMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.u1, e.results.err
+			return e.results.err
 		}
 	}
 
-	if mmGetUserByID.GetUserByIDMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmGetUserByID.GetUserByIDMock.defaultExpectation.Counter, 1)
-		mm_want := mmGetUserByID.GetUserByIDMock.defaultExpectation.params
-		mm_got := StoreMockGetUserByIDParams{ctx, userID}
+	if mmUpdateUser.UpdateUserMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmUpdateUser.UpdateUserMock.defaultExpectation.Counter, 1)
+		mm_want := mmUpdateUser.UpdateUserMock.defaultExpectation.params
+		mm_got := StoreMockUpdateUserParams{ctx, user}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmGetUserByID.t.Errorf("StoreMock.GetUserByID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmUpdateUser.t.Errorf("StoreMock.UpdateUser got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmGetUserByID.GetUserByIDMock.defaultExpectation.results
+		mm_results := mmUpdateUser.UpdateUserMock.defaultExpectation.results
 		if mm_results == nil {
-			mmGetUserByID.t.Fatal("No results are set for the StoreMock.GetUserByID")
+			mmUpdateUser.t.Fatal("No results are set for the StoreMock.UpdateUser")
 		}
-		return (*mm_results).u1, (*mm_results).err
+		return (*mm_results).err
 	}
-	if mmGetUserByID.funcGetUserByID != nil {
-		return mmGetUserByID.funcGetUserByID(ctx, userID)
+	if mmUpdateUser.funcUpdateUser != nil {
+		return mmUpdateUser.funcUpdateUser(ctx, user)
 	}
-	mmGetUserByID.t.Fatalf("Unexpected call to StoreMock.GetUserByID. %v %v", ctx, userID)
+	mmUpdateUser.t.Fatalf("Unexpected call to StoreMock.UpdateUser. %v %v", ctx, user)
 	return
 }
 
-// GetUserByIDAfterCounter returns a count of finished StoreMock.GetUserByID invocations
-func (mmGetUserByID *StoreMock) GetUserByIDAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmGetUserByID.afterGetUserByIDCounter)
+// UpdateUserAfterCounter returns a count of finished StoreMock.UpdateUser invocations
+func (mmUpdateUser *StoreMock) UpdateUserAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdateUser.afterUpdateUserCounter)
 }
 
-// GetUserByIDBeforeCounter returns a count of StoreMock.GetUserByID invocations
-func (mmGetUserByID *StoreMock) GetUserByIDBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmGetUserByID.beforeGetUserByIDCounter)
+// UpdateUserBeforeCounter returns a count of StoreMock.UpdateUser invocations
+func (mmUpdateUser *StoreMock) UpdateUserBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdateUser.beforeUpdateUserCounter)
 }
 
-// Calls returns a list of arguments used in each call to StoreMock.GetUserByID.
+// Calls returns a list of arguments used in each call to StoreMock.UpdateUser.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmGetUserByID *mStoreMockGetUserByID) Calls() []*StoreMockGetUserByIDParams {
-	mmGetUserByID.mutex.RLock()
+func (mmUpdateUser *mStoreMockUpdateUser) Calls() []*StoreMockUpdateUserParams {
+	mmUpdateUser.mutex.RLock()
 
-	argCopy := make([]*StoreMockGetUserByIDParams, len(mmGetUserByID.callArgs))
-	copy(argCopy, mmGetUserByID.callArgs)
+	argCopy := make([]*StoreMockUpdateUserParams, len(mmUpdateUser.callArgs))
+	copy(argCopy, mmUpdateUser.callArgs)
 
-	mmGetUserByID.mutex.RUnlock()
+	mmUpdateUser.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockGetUserByIDDone returns true if the count of the GetUserByID invocations corresponds
+// MinimockUpdateUserDone returns true if the count of the UpdateUser invocations corresponds
 // the number of defined expectations
-func (m *StoreMock) MinimockGetUserByIDDone() bool {
-	for _, e := range m.GetUserByIDMock.expectations {
+func (m *StoreMock) MinimockUpdateUserDone() bool {
+	for _, e := range m.UpdateUserMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.GetUserByIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetUserByIDCounter) < 1 {
+	if m.UpdateUserMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdateUserCounter) < 1 {
 		return false
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcGetUserByID != nil && mm_atomic.LoadUint64(&m.afterGetUserByIDCounter) < 1 {
+	if m.funcUpdateUser != nil && mm_atomic.LoadUint64(&m.afterUpdateUserCounter) < 1 {
 		return false
 	}
 	return true
 }
 
-// MinimockGetUserByIDInspect logs each unmet expectation
-func (m *StoreMock) MinimockGetUserByIDInspect() {
-	for _, e := range m.GetUserByIDMock.expectations {
+// MinimockUpdateUserInspect logs each unmet expectation
+func (m *StoreMock) MinimockUpdateUserInspect() {
+	for _, e := range m.UpdateUserMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to StoreMock.GetUserByID with params: %#v", *e.params)
+			m.t.Errorf("Expected call to StoreMock.UpdateUser with params: %#v", *e.params)
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.GetUserByIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetUserByIDCounter) < 1 {
-		if m.GetUserByIDMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to StoreMock.GetUserByID")
+	if m.UpdateUserMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdateUserCounter) < 1 {
+		if m.UpdateUserMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to StoreMock.UpdateUser")
 		} else {
-			m.t.Errorf("Expected call to StoreMock.GetUserByID with params: %#v", *m.GetUserByIDMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to StoreMock.UpdateUser with params: %#v", *m.UpdateUserMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcGetUserByID != nil && mm_atomic.LoadUint64(&m.afterGetUserByIDCounter) < 1 {
-		m.t.Error("Expected call to StoreMock.GetUserByID")
+	if m.funcUpdateUser != nil && mm_atomic.LoadUint64(&m.afterUpdateUserCounter) < 1 {
+		m.t.Error("Expected call to StoreMock.UpdateUser")
 	}
 }
 
@@ -486,7 +485,7 @@ func (m *StoreMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockDeleteStateInspect()
 
-		m.MinimockGetUserByIDInspect()
+		m.MinimockUpdateUserInspect()
 		m.t.FailNow()
 	}
 }
@@ -511,5 +510,5 @@ func (m *StoreMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockDeleteStateDone() &&
-		m.MinimockGetUserByIDDone()
+		m.MinimockUpdateUserDone()
 }

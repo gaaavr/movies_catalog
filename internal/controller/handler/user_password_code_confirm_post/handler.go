@@ -1,5 +1,5 @@
-//go:generate minimock -i .store,.tokenGenerator -s _mock.go -o ./mock -g
-package user_code_confirm_post
+//go:generate minimock -i .store -s _mock.go -o ./mock -g
+package user_password_code_confirm_post
 
 import (
 	"context"
@@ -14,17 +14,12 @@ import (
 )
 
 type store interface {
-	GetUserByID(ctx context.Context, userID int64) (models.User, error)
+	UpdateUser(ctx context.Context, user models.User) error
 	DeleteState(ctx context.Context, stateID string, code int64) (int64, string, error)
 }
 
-type tokenGenerator interface {
-	GenerateToken(user models.User) (string, error)
-}
-
 type Handler struct {
-	store          store
-	tokenGenerator tokenGenerator
+	store store
 }
 
 type confirmCodeRequest struct {
@@ -32,24 +27,22 @@ type confirmCodeRequest struct {
 	Code  int64  `json:"code"`
 }
 
-func New(store store, tokenGenerator tokenGenerator) *Handler {
+func New(store store) *Handler {
 	return &Handler{
-		store:          store,
-		tokenGenerator: tokenGenerator,
+		store: store,
 	}
 }
 
 // Handle godoc
 // @Summary confirm code by user
 // @Tags user
-// @Description get token after success login user
-// @ID user-code-post
-// @Param user body confirmCodeRequest  true "code and state for login"
-// @Produce json
-// @Success 200 {object} view.Token "success"
+// @Description change password after confirm by user
+// @ID user-pass-code-post
+// @Param user body confirmCodeRequest  true "code and state for change pass"
+// @Success 200
 // @Failure 400 {object} view.ErrorResponse "bad request"
 // @Failure 500 {object} view.ErrorResponse "internal error"
-// @Router /users/code [post]
+// @Router /users/password/code [post]
 func (h *Handler) Handle(c *gin.Context) {
 	ctx := context.Background()
 
@@ -77,7 +70,7 @@ func (h *Handler) Handle(c *gin.Context) {
 		return
 	}
 
-	userID, _, err := h.store.DeleteState(ctx, request.State, request.Code)
+	userID, newPass, err := h.store.DeleteState(ctx, request.State, request.Code)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -87,30 +80,20 @@ func (h *Handler) Handle(c *gin.Context) {
 		return
 	}
 
-	user, err := h.store.GetUserByID(ctx, userID)
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			view.NewErrorResponse(err),
-		)
-
-		return
-	}
-
-	token, err := h.tokenGenerator.GenerateToken(user)
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			view.NewErrorResponse(err),
-		)
-
-		return
-	}
-
-	c.JSON(http.StatusOK, view.Token{
-		Token: token,
-		Role:  user.Role,
+	err = h.store.UpdateUser(ctx, models.User{
+		ID:       int(userID),
+		Password: newPass,
 	})
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			view.NewErrorResponse(err),
+		)
+
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (h *Handler) GetMethod() string {
@@ -118,5 +101,5 @@ func (h *Handler) GetMethod() string {
 }
 
 func (h *Handler) GetPath() string {
-	return "/users/code"
+	return "/users/password/code"
 }
