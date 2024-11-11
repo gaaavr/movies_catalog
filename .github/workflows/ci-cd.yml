@@ -114,7 +114,7 @@ jobs:
         run: curl -o log.json -X GET "http://localhost:16686/api/traces?service=movies_catalog"
 
       - name: Upload log as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: log_result
           path: log.json
