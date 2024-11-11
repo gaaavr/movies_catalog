@@ -107,6 +107,17 @@ jobs:
           CHANGE_NEW_PASS: ${{ secrets.CHANGE_NEW_PASS}}
           CHANGE_PASS_APP_PASS: ${{ secrets.CHANGE_PASS_APP_PASS}}
           SERVICE_PORT: 8080
+          OTEL_EXPORTER_JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+          OTEL_RESOURCE_ATTRIBUTES: "service.name=movies_catalog,service.version=0.1.0"
+
+      - name: create-artifact
+        run: curl -X GET "http://localhost:16686/api/traces?service=movies_catalog" > log.json
+
+      - name: upload logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: e2e-logs
+          path: internal/controller/e2e/log.json
 
       - name: Stop Docker Compose
         run: docker compose -f docker-compose.yml down

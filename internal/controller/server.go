@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	"web_lab/internal/config"
 	"web_lab/internal/controller/middleware/cors_middleware"
@@ -28,6 +29,7 @@ func NewServer(
 	authenticator authenticator,
 ) *Server {
 	router := gin.New()
+	router.Use(otelgin.Middleware("movies_catalog"))
 
 	// Определение функций шаблонов
 	funcMap := template.FuncMap{

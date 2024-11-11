@@ -52,7 +52,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS states_id_idx ON states (state_id,code,user_id
 -- Добавление тестовых данных
 INSERT INTO users
     (username, password, role)
-VALUES ('molka4477@gmail.com', '123', 'user'),
+VALUES ('molka4477@gmail.com', '123', 'admin'),
        ('smilee88@yandex.ru', 'qwerty', 'user');
 
 INSERT INTO movies
