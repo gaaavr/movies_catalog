@@ -28,7 +28,7 @@ var movie = models.Movie{
 	Description: "description",
 }
 
-func main() {
+func main() { // nolint
 	ctx := context.Background()
 	fileStd, err := os.Create("cmd/benchmark/result1")
 	if err != nil {
