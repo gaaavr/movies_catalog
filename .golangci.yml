@@ -1,0 +1,11 @@
+linters:
+  enable:
+    - gocyclo
+    - gocognit
+
+linters-settings:
+  gocyclo:
+    min-complexity: 10  # Минимальная цикломатическая сложность
+
+  gocognit:
+    min-complexity: 10  # Минимальная сложность по Холстеду

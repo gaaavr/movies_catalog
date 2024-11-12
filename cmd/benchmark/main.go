@@ -28,7 +28,7 @@ var movie = models.Movie{
 	Description: "description",
 }
 
-func main() {
+func main() { // nolint
 	ctx := context.Background()
 	fileStd, err := os.Create("cmd/benchmark/result1")
 	if err != nil {
@@ -190,11 +190,11 @@ func createHistogram(values []float64, histName string) {
 	p.X.Max = 100
 
 	p.X.Tick.Marker = plot.ConstantTicks([]plot.Tick{
-		{50, fmt.Sprintf("50%%\n%.0f", percentilesValues[0])},
-		{75, fmt.Sprintf("75%%\n%.0f", percentilesValues[1])},
-		{90, fmt.Sprintf("90%%\n%.0f", percentilesValues[2])},
-		{95, fmt.Sprintf("95%%\n%.0f", percentilesValues[3])},
-		{99, fmt.Sprintf("99%%\n%.0f", percentilesValues[4])},
+		{Value: 50, Label: fmt.Sprintf("50%%\n%.0f", percentilesValues[0])},
+		{Value: 75, Label: fmt.Sprintf("75%%\n%.0f", percentilesValues[1])},
+		{Value: 90, Label: fmt.Sprintf("90%%\n%.0f", percentilesValues[2])},
+		{Value: 95, Label: fmt.Sprintf("95%%\n%.0f", percentilesValues[3])},
+		{Value: 99, Label: fmt.Sprintf("99%%\n%.0f", percentilesValues[4])},
 	})
 
 	// Сохранение графика в файл
