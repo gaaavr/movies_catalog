@@ -1,7 +1,10 @@
 linters:
   enable:
+    - staticcheck
     - gocyclo
     - gocognit
+    - govet
+    - errcheck
 
 linters-settings:
   gocyclo:
@@ -9,3 +12,8 @@ linters-settings:
 
   gocognit:
     min-complexity: 10  # Минимальная сложность по Холстеду
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      text: "error return value is not checked"

@@ -17,9 +17,9 @@ const (
 )
 
 var (
-	forbiddenErr    = errors.New("user has no rights")
-	emptyTokenErr   = errors.New("token is empty")
-	invalidTokenErr = errors.New("token is invalid")
+	errForbidden    = errors.New("user has no rights")
+	errEmptyToken   = errors.New("token is empty")
+	errInvalidToken = errors.New("token is invalid")
 )
 
 type tokenChecker interface {
@@ -42,7 +42,7 @@ func (h *Handler) AuthAdmin() gin.HandlerFunc {
 		if token == "" {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				view.NewErrorResponse(emptyTokenErr),
+				view.NewErrorResponse(errEmptyToken),
 			)
 
 			return
@@ -61,7 +61,7 @@ func (h *Handler) AuthAdmin() gin.HandlerFunc {
 		if !isValid {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				view.NewErrorResponse(invalidTokenErr),
+				view.NewErrorResponse(errInvalidToken),
 			)
 
 			return
@@ -70,7 +70,7 @@ func (h *Handler) AuthAdmin() gin.HandlerFunc {
 		if role != adminRole {
 			c.AbortWithStatusJSON(
 				http.StatusForbidden,
-				view.NewErrorResponse(forbiddenErr))
+				view.NewErrorResponse(errForbidden))
 
 			return
 		}
@@ -87,7 +87,7 @@ func (h *Handler) AuthUser() gin.HandlerFunc {
 		if token == "" {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				view.NewErrorResponse(emptyTokenErr),
+				view.NewErrorResponse(errEmptyToken),
 			)
 
 			return
@@ -97,7 +97,7 @@ func (h *Handler) AuthUser() gin.HandlerFunc {
 		if err != nil {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				view.NewErrorResponse(emptyTokenErr),
+				view.NewErrorResponse(errEmptyToken),
 			)
 
 			return
@@ -106,7 +106,7 @@ func (h *Handler) AuthUser() gin.HandlerFunc {
 		if !isValid {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				view.NewErrorResponse(invalidTokenErr),
+				view.NewErrorResponse(errInvalidToken),
 			)
 
 			return
@@ -115,7 +115,7 @@ func (h *Handler) AuthUser() gin.HandlerFunc {
 		if role != userRole && role != adminRole {
 			c.AbortWithStatusJSON(
 				http.StatusForbidden,
-				view.NewErrorResponse(forbiddenErr))
+				view.NewErrorResponse(errForbidden))
 
 			return
 		}

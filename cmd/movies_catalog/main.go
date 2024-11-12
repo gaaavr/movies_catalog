@@ -59,6 +59,8 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to create config")
 	}
 
+	return
+
 	pgStorage, err := pg.NewStorage(cfg.Postgres)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create pg connection")
