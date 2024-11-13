@@ -502,7 +502,7 @@ const docTemplate = `{
         },
         "/users/password": {
             "put": {
-                "description": "get code after change password password",
+                "description": "get code after change password",
                 "produces": [
                     "application/json"
                 ],

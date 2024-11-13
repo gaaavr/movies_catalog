@@ -456,7 +456,7 @@ paths:
       - user
   /users/password:
     put:
-      description: get code after change password password
+      description: get code after change password
       operationId: user-pass-put
       parameters:
       - description: username, password  and new password
