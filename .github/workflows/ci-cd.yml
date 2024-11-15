@@ -117,7 +117,7 @@ jobs:
           docker compose -f docker-compose.yml up -d
 
       - name: Run E2E tests
-        run: go test -v -shuffle on -parallel 4 -tags=e2e ./internal/controller/e2e
+        run: go test -v -shuffle on -parallel 4 -tags=e2e -cpuprofile cpu_profile.out ./internal/controller/e2e
         env:
           REGISTER_EMAIL: ${{ secrets.REGISTER_EMAIL }}
           REGISTER_PASSWORD: ${{ secrets.REGISTER_PASSWORD }}
@@ -135,38 +135,14 @@ jobs:
           OTEL_EXPORTER_JAEGER_ENDPOINT: http://jaeger:14268/api/traces
           OTEL_RESOURCE_ATTRIBUTES: "service.name=movies_catalog,service.version=0.1.0"
 
-      - name: Stop Docker Compose
-        run: docker compose -f docker-compose.yml down
-
-  profile:
-    runs-on: ubuntu-latest
-    needs: e2e-tests
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Graphviz
-        run: sudo apt-get install -y graphviz
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.22'
-
-      - name: Set ENVs
-        run: make env
-
-      - name: Start Docker Compose
-        run: |
-          docker compose -f docker-compose.yml up -d
-
       - name: Collect CPU profile
         run: |
-          go tool pprof -svg http://localhost:6060/debug/pprof/profile > cpu_profile.svg
+          go tool pprof -svg cpu_profile.out > cpu_profile.svg
 
       - name: Collect Heap profile
         run: |
           go tool pprof -svg http://localhost:6060/debug/pprof/heap > heap_profile.svg
+
 
       - name: create-artifact
         run: curl -o log.json -X GET "http://localhost:16686/api/traces?service=movies_catalog"
