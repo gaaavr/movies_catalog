@@ -24,6 +24,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: ${OTEL_EXPORTER_JAEGER_ENDPOINT}
     ports:
       - ${SERVICE_PORT}:${SERVICE_PORT}
+      - "6060:6060"
     networks:
       - movies_catalog
 

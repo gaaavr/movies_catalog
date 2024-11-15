@@ -131,6 +131,15 @@ jobs:
           OTEL_EXPORTER_JAEGER_ENDPOINT: http://jaeger:14268/api/traces
           OTEL_RESOURCE_ATTRIBUTES: "service.name=movies_catalog,service.version=0.1.0"
 
+      - name: Collect CPU profile
+        run: |
+          go tool pprof -svg http://localhost:6060/debug/pprof/profile > cpu_profile.svg
+
+      - name: Collect Heap profile
+        run: |
+          go tool pprof -svg http://localhost:6060/debug/pprof/heap > heap_profile.svg
+
+
       - name: create-artifact
         run: curl -o log.json -X GET "http://localhost:16686/api/traces?service=movies_catalog"
 
@@ -139,6 +148,14 @@ jobs:
         with:
           name: log_result
           path: log.json
+
+      - name: Upload profiles as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pprof-profiles
+          path: |
+            cpu_profile.svg
+            heap_profile.svg
 
       - name: Stop Docker Compose
         run: docker compose -f docker-compose.yml down

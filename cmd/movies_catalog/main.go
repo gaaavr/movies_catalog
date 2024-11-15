@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,7 +16,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/jaeger" // nolint
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
@@ -181,6 +182,12 @@ func main() {
 
 	log.Info().Msg("Service is running")
 
+	go func() {
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			log.Fatal().Err(err)
+		}
+	}()
+
 	err = server.Run()
 	if err != nil {
 		log.Fatal().Err(err)
@@ -255,7 +262,7 @@ func newPropagator() propagation.TextMapPropagator {
 }
 
 func newTraceProvider() (*trace.TracerProvider, error) {
-	exporter, err := otlptracehttp.New(context.Background(), otlptracehttp.WithEndpoint(os.Getenv("OTEL_EXPORTER_JAEGER_ENDPOINT")))
+	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(os.Getenv("OTEL_EXPORTER_JAEGER_ENDPOINT"))))
 	if err != nil {
 		return nil, err
 	}
